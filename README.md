@@ -1,6 +1,6 @@
 # Swale CLI
 
-`swale` is the command line interface to [Swale](https://www.swale.io) — create and run workflows, and manage projects, task definitions and secrets from a terminal.
+`swale` is the command line interface to [Swale](https://swale.io) — create and run workflows, and manage projects, task definitions and secrets from a terminal.
 
 This repository publishes the released binaries. The CLI is built elsewhere; releases are all that is hosted here.
 
@@ -9,19 +9,19 @@ This repository publishes the released binaries. The CLI is built elsewhere; rel
 **macOS and Linux**
 
 ```sh
-curl -fsSL https://www.swale.io/install.sh | sh
+curl -fsSL https://get.swale.io/install.sh | sh
 ```
 
 **Windows**
 
 ```powershell
-irm https://www.swale.io/install.ps1 | iex
+irm https://get.swale.io/install.ps1 | iex
 ```
 
 To install a specific version, download the script and pass `--version`:
 
 ```sh
-curl -fsSL https://www.swale.io/install.sh | sh -s -- --version 1.4.0
+curl -fsSL https://get.swale.io/install.sh | sh -s -- --version 1.4.0
 ```
 
 Or take a binary from the [latest release](../../releases/latest) and put it somewhere on your `PATH`. The installers verify what they download; a manual download is yours to check, and the section below is how.
@@ -33,7 +33,7 @@ Every release carries `manifest.json`, which lists a SHA-256 for each platform b
 The installers do this automatically when `gpg` is present, and warn rather than fail when it is not. By hand:
 
 ```sh
-curl -fsSLO https://www.swale.io/.well-known/pgp-key.txt
+curl -fsSLO https://swale.io/.well-known/pgp-key.txt
 curl -fsSLO https://github.com/swaleio/swale-cli/releases/latest/download/manifest.json
 curl -fsSLO https://github.com/swaleio/swale-cli/releases/latest/download/manifest.json.sig
 
@@ -53,4 +53,4 @@ The signing key is served from `swale.io`, deliberately not from this repository
 
 ## Links
 
-[swale.io](https://www.swale.io) · [Documentation](https://docs.swale.io)
+[swale.io](https://swale.io) · [Documentation](https://docs.swale.io)
