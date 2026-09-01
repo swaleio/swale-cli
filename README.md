@@ -22,6 +22,20 @@ The installer picks the binary for your platform, verifies it, and installs it. 
 
 Or take a binary from the [latest release](../../releases/latest) and put it somewhere on your `PATH`. The installers verify what they download; a manual download is yours to check.
 
+## Run it in a container
+
+If you would rather not install anything:
+
+```sh
+docker run --rm -v "$PWD:/mnt/workspace" swaleio/swale-cli repo list
+```
+
+Built for `linux/amd64` and `linux/arm64`. The image contains the same released
+binary this repository publishes, fetched at build time and checked against the
+signature below, so it needs no verification of its own. Authentication is by
+environment variable — pass `SWALE_ACCOUNT_NAME` and `SWALE_ACCOUNT_TOKEN` with
+`-e`, or mount your existing configuration.
+
 ## Verifying a download
 
 Every release carries `manifest.json`, listing a SHA-256 for each platform binary, and `manifest.json.sig`, a detached OpenPGP signature over it — so one signature covers every binary in the release. The installers check both automatically when `gpg` is available.
