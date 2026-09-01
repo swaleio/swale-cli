@@ -75,6 +75,20 @@ jobs:
           username: ${{ vars.DOCKERHUB_ORGANIZATION }}
           password: ${{ secrets.DOCKERHUB_ORGANIZATION_TOKEN }}
 
+      # The Dockerfile owns the labels that describe the software; metadata-action
+      # owns the ones that describe the build. Without this the two collide: a
+      # build --label beats a Dockerfile LABEL, so metadata-action's repository-
+      # derived defaults would win — titling the image swale-cli, and blanking the
+      # license, because this repository has no license file for it to read.
+      - name: Read labels from the Dockerfile
+        id: imagemeta
+        run: |
+          for label in title description licenses; do
+            value=$(grep -m1 "^LABEL org.opencontainers.image.${label}=" Dockerfile | cut -d'"' -f2)
+            [[ -n "$value" ]] || { echo "::error::Dockerfile has no org.opencontainers.image.${label} label"; exit 1; }
+            echo "${label}=${value}" >> "$GITHUB_OUTPUT"
+          done
+
       # latest follows a published, non-prerelease release. A dispatch has to ask
       # for it, so rebuilding an old version cannot silently move it.
       - name: Compute tags
@@ -85,6 +99,10 @@ jobs:
           tags: |
             type=raw,value=${{ steps.version.outputs.version }}
             type=raw,value=latest,enable=${{ (github.event_name == 'release' && !github.event.release.prerelease) || inputs.latest }}
+          labels: |
+            org.opencontainers.image.title=${{ steps.imagemeta.outputs.title }}
+            org.opencontainers.image.description=${{ steps.imagemeta.outputs.description }}
+            org.opencontainers.image.licenses=${{ steps.imagemeta.outputs.licenses }}
 
       - name: Build and push
         id: build
@@ -111,9 +129,11 @@ jobs:
       - name: Report published digest
         run: |
           echo "Published ${IMAGE}@${DIGEST}"
-          echo "\`${IMAGE}@${DIGEST}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Pin this digest in the referencing task definition's \`exec.image\`." >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "\`${IMAGE}@${DIGEST}\`"
+            echo ""
+            echo "Pin this digest in the referencing task definition's \`exec.image\`."
+          } >> "$GITHUB_STEP_SUMMARY"
         env:
           IMAGE: ${{ env.IMAGE }}
           DIGEST: ${{ steps.build.outputs.digest }}
