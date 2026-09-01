@@ -85,4 +85,8 @@ LABEL org.opencontainers.image.title="Swale CLI"
 LABEL org.opencontainers.image.description="The Swale command line interface, for workflow tasks and for running the CLI without installing it."
 LABEL org.opencontainers.image.source="https://github.com/swaleio/swale-cli"
 LABEL org.opencontainers.image.documentation="https://docs.swale.io/reference/install-cli"
-LABEL org.opencontainers.image.licenses="MIT"
+# The image carries Swale's CLI, which is not open source and grants no
+# license by being downloadable. SPDX has no identifier for that, so the
+# LicenseRef- form says it deliberately rather than leaving the field blank
+# for a reader to fill in with the base image's terms.
+LABEL org.opencontainers.image.licenses="LicenseRef-Proprietary"
