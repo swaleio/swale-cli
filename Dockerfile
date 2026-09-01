@@ -82,7 +82,7 @@ ENTRYPOINT ["swale"]
 CMD ["--help"]
 
 LABEL org.opencontainers.image.title="Swale CLI"
-LABEL org.opencontainers.image.description="The Swale command line interface, for workflow tasks and for running the CLI without installing it."
+LABEL org.opencontainers.image.description="The Swale command line interface, for workflow tasks and for running it without installing."
 LABEL org.opencontainers.image.source="https://github.com/swaleio/swale-cli"
 LABEL org.opencontainers.image.documentation="https://docs.swale.io/reference/install-cli"
 # The image carries Swale's CLI, which is not open source and grants no

@@ -1,0 +1,57 @@
+name: Sync Docker Hub description
+
+# The Docker Hub page for the image is a copy of this repository's README, and
+# has to be pushed there; nothing about publishing an image updates it. It is
+# synced on change rather than on release because the page describes the CLI,
+# not a version of it — a README fix should reach it without waiting for one.
+#
+# Until this repository built the image, the page was written by task-definitions
+# from its own placeholder README. Removing the image from that repository stops
+# those writes, so without this workflow the page would keep describing an image
+# that no longer exists.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - Dockerfile
+      - .github/workflows/sync-description.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-description
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      # The same label the image carries, so the one-liner on the page and the
+      # one on the image cannot disagree. Docker Hub truncates past 100
+      # characters, which is silent, so the length is checked here instead.
+      - name: Read the short description from the Dockerfile
+        id: imagemeta
+        run: |
+          description=$(grep -m1 '^LABEL org.opencontainers.image.description=' Dockerfile | cut -d'"' -f2)
+          [[ -n "$description" ]] || { echo "::error::Dockerfile has no org.opencontainers.image.description label"; exit 1; }
+          (( ${#description} <= 100 )) || { echo "::error::Short description is ${#description} characters; Docker Hub allows 100"; exit 1; }
+          echo "description=$description" >> "$GITHUB_OUTPUT"
+
+      # Docker Hub's management API rejects organization tokens, so this needs a
+      # user credential rather than the one the image is pushed with.
+      - name: Sync README to Docker Hub
+        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ vars.DOCKERHUB_ORGANIZATION }}/swale-cli
+          readme-filepath: README.md
+          short-description: ${{ steps.imagemeta.outputs.description }}
