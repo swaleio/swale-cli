@@ -21,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version to package, without the leading v (e.g. 0.1.0)."
+        description: "Release version to package, without the leading v (e.g. 1.0.0)."
         required: true
       latest:
         description: "Also move the latest tag. Leave off when rebuilding an older release."
