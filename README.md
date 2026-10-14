@@ -20,7 +20,7 @@ irm https://get.swale.io/install.ps1 | iex
 
 The installer picks the binary for your platform, verifies it, and installs it. For a specific version, a different install location, or the Windows form that takes arguments, see [Install the CLI](https://docs.swale.io/reference/install-cli).
 
-Or take a binary from the [latest release](../../releases/latest) and put it somewhere on your `PATH`. The installers verify what they download; a manual download is yours to check.
+Or take the binary for your platform from the [latest release](../../releases/latest), rename it to `swale` (`swale.exe` on Windows), make it executable on macOS and Linux (`chmod +x swale`), and put it in a directory on your `PATH`. The installers verify what they download; a manual download is yours to check, and [Install the CLI](https://docs.swale.io/reference/install-cli#install-a-downloaded-binary) has the steps for both.
 
 ## Run it in a container
 
@@ -41,6 +41,8 @@ environment variable — pass `SWALE_ACCOUNT_NAME` and `SWALE_ACCOUNT_TOKEN` wit
 Every release carries `manifest.json`, listing a SHA-256 for each platform binary, and `manifest.json.sig`, a detached OpenPGP signature over it — so one signature covers every binary in the release. The installers check both automatically when `gpg` is available.
 
 The signing key is served from `swale.io`, deliberately not from this repository: a key published beside the artifacts it verifies proves nothing, because whatever could replace a binary here could replace the key alongside it.
+
+The macOS and Windows binaries are also signed for their own platforms: the macOS ones with Swale IO, Inc.'s Apple Developer ID and notarized by Apple, the Windows ones with an Authenticode certificate issued to Swale IO, Inc.
 
 The commands to check a download by hand are in [Install the CLI](https://docs.swale.io/reference/install-cli#verifying-a-download).
 
