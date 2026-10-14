@@ -54,17 +54,21 @@ RUN set -eux; \
 
 FROM docker.io/library/debian@sha256:28de0877c2189802884ccd20f15ee41c203573bd87bb6b883f5f46362d24c5c2
 
-# ca-certificates for HTTPS to the Swale service, and libicu because the CLI is
-# a NativeAOT .NET binary: without it the process dies at startup with
-# "Couldn't find a valid ICU package" before running any command, and slim
-# bases do not carry it. Plus a non-root runtime user.
+# ca-certificates for HTTPS to the Swale service, plus a non-root runtime user.
+# No ICU: the CLI runs with invariant globalization, so it starts without one.
+# The home is writable by any user ID, as /tmp is, because `docker run --user`
+# with an ID that has no account here would get HOME=/, where the CLI cannot
+# create the cache and credentials it keeps under its home.
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends ca-certificates libicu76; \
+    apt-get install -y --no-install-recommends ca-certificates; \
     rm -rf /var/lib/apt/lists/*; \
     useradd --create-home --user-group --uid 1000 swale; \
+    chmod 1777 /home/swale; \
     mkdir -p /mnt/workspace; \
     chown swale:swale /mnt/workspace
+
+ENV HOME=/home/swale
 
 COPY --from=fetch /fetch/swale /usr/local/bin/swale
 
