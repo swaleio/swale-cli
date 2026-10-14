@@ -89,8 +89,22 @@ jobs:
             echo "${label}=${value}" >> "$GITHUB_OUTPUT"
           done
 
-      # latest follows a published, non-prerelease release. A dispatch has to ask
-      # for it, so rebuilding an old version cannot silently move it.
+      # The image's latest follows this repository's latest release, which the
+      # release pipeline withholds from a fix to an older line, so being
+      # published is not enough. A pre-release is never the latest.
+      - name: Check whether the release is the latest
+        id: latest
+        if: github.event_name == 'release' && !github.event.release.prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          latest=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq '.tagName == env.TAG')
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+
+      # A dispatch has to ask for latest, so rebuilding an old version cannot
+      # silently move it. Both sides compare, so enable is always true or
+      # false: metadata-action refuses an empty one.
       - name: Compute tags
         id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
@@ -98,7 +112,7 @@ jobs:
           images: ${{ env.IMAGE }}
           tags: |
             type=raw,value=${{ steps.version.outputs.version }}
-            type=raw,value=latest,enable=${{ (github.event_name == 'release' && !github.event.release.prerelease) || inputs.latest }}
+            type=raw,value=latest,enable=${{ steps.latest.outputs.latest == 'true' || inputs.latest == true }}
           labels: |
             org.opencontainers.image.title=${{ steps.imagemeta.outputs.title }}
             org.opencontainers.image.description=${{ steps.imagemeta.outputs.description }}
